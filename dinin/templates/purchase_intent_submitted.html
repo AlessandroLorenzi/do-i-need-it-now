@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do I Need it NOW?</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+    <h1>Do I Need it NOW?</h1>        
+    </div>
+    <div class="container">
+    <h2>Grazie per aver inviato la tua intenzione di acquisto!</h2>
+    <p>Rivedi le tue risposte qui sotto e aspetta la mia email tra una settimana per rivalutare l'acquisto.</p>
+    <ul>
+        <li><strong>Oggetto da acquistare:</strong> {{ purchase_intent.description }}</li>
+        {% if og_info.image %}
+        <li><img src="{{ og_info.image }}" alt="Open Graph Image" style="max-width:200px;"></li>
+        {% endif %}
+        <li><strong>Quale bisogno ti soddisfa?</strong> {{ purchase_intent.need_description }}</li>
+        <li><strong>Ci sono alternative?</strong> {{ purchase_intent.alternative }}</li>
+        <li><strong>Se nessuno sapesse che ho acquistato questo oggetto, lo desidererei ancora?</strong> {{ purchase_intent.vanity_free_desire }}</li>
+        <li><strong>Email per il promemoria:</strong> {{ purchase_intent.email }}</li>
+        <li><a href="{{ purchase_intent.url }}">{{ purchase_intent.url }}</a></li>
+    </ul>
+    </div>
+    <div>
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Ritorna alla home</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>

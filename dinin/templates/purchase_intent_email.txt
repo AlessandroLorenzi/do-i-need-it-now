@@ -1,0 +1,17 @@
+Ciao,
+
+Una settimana fa volevi acquistare "{{ purchase_intent.description }}", sei ancora della stessa idea?
+
+DETTAGLI:
+
+- Oggetto da acquistare: {{ purchase_intent.description }}
+{% if og_info.image %}
+- Immagine: {{ og_info.image }}
+{% endif %}
+- Quale bisogno ti soddisfa? {{ purchase_intent.need_description }}
+- Ci sono alternative? {{ purchase_intent.alternative }}
+- Se nessuno sapesse che ho acquistato questo oggetto, lo desidererei ancora? {{ purchase_intent.vanity_free_desire }}
+- Link: {{ purchase_intent.url }}
+
+Ciao,
+The DININ Team

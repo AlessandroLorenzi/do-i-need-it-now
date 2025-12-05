@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+        
+        <p>Ciao,</p>
+        
+        <p>Una settimana fa volevi acquistare "{{ purchase_intent.description }}", sei ancora della stessa idea?</p>
+        
+        <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
+            <h3 style="margin-top: 0; color: #555;">Dettagli:</h3>
+<ul>
+        <li><strong>Oggetto da acquistare:</strong> {{ purchase_intent.description }}</li>
+        {% if og_info.image %}
+        <li><img src="{{ og_info.image }}" alt="Open Graph Image" style="max-width:200px;"></li>
+        {% endif %}
+        <li><strong>Quale bisogno ti soddisfa?</strong> {{ purchase_intent.need_description }}</li>
+        <li><strong>Ci sono alternative?</strong> {{ purchase_intent.alternative }}</li>
+        <li><strong>Se nessuno sapesse che ho acquistato questo oggetto, lo desidererei ancora?</strong> {{ purchase_intent.vanity_free_desire }}</li>
+        <li><a href="{{ purchase_intent.url }}">{{ purchase_intent.url }}</a></li>
+    </ul>
+        </div>
+        
+        
+        <p style="margin-top: 30px;">
+            Ciao,<br>
+            The DININ Team
+        </p>
+    </div>
+</body>
+</html>

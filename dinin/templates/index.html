@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do I Need it NOW?</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+    <h1>Do I Need it NOW?</h1>        
+    </div>
+    <div class="container">
+    <form id="intent-form" method="post" action="/purchase-intent/submit ">
+        <div class="mb-3">
+            <label class="form-label" for="description">Quale oggetto vorresti acquistare?</label>
+            <input class="form-control" type="text" id="description" name="description" required>
+            <div id="descriptionHelp" class="form-text">Dimmi cosa ti interessa acquistare</div>
+        </div>
+
+        <div class="mb-3">
+            <label  class="form-label" for="need_description">Quale bisogno soddisfa l'acquisto?</label><br>
+            <textarea  class="form-control" id="need_description" name="need_description" required></textarea>
+            <div id="needDescriptionHelp" class="form-text">Quando acquisti parti dai tuoi reali bisogni!</div>
+        </div>
+        
+
+        <div class="mb-3">
+            <label class="form-label" for="alternative">Hai giá qualcosa che ha la stessa funzione? Questo lo farebbe cosí meglio da giustificare l'acquisto? Posso aggiustare o rivendere il vecchio?</label><br>
+            <textarea class="form-control" id="alternative" name="alternative" required></textarea>
+            <div id="alternativeHelp" class="form-text">Considera anche il costo ambientale nell'acquisto di oggetti nuovi.</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="vanity_free_desire">Se nessuno sapesse che ho questo oggetto, lo desidererei ancora?</label><br>
+            <textarea class="form-control" id="vanity_free_desire" name="vanity_free_desire" required></textarea>
+            <div id="vanityFreeDesireHelp" class="form-text">Rispondi onestamente per aiutarti a riflettere sul desiderio reale.</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="waiting_pleasure">Vuoi aspettare una settimana per vedere se il desiderio di acquistare rimane? Ti scrivo io per ricordartelo, mi basta sapere la tua email:</label><br>
+            <input class="form-control" type="text" id="email" name="email" value="{{ email }}" required>
+            <div id="emailHelp" class="form-text">Non condividerò la tua email con nessuno.</div>
+
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="url">Il link all'oggetto (facoltativo):</label>
+            <input class="form-control" type="text" id="url" name="url">
+            <div id="urlHelp" class="form-text">Potrebbe essere aggiunto un referral nella mail di reminder.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Sí, ricordami di rivalutare l'acquisto tra una settimana.</button>
+    </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
