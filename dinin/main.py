@@ -109,6 +109,9 @@ def send_emails():
 
     return f"Found {len(items_to_notify)} items to notify.", 200
 
+@app.route("/about", methods=["GET"])
+def about():
+    return render_template("about.html")
 
 if __name__ == "__main__":
     fetch_og = OpenGraphInfoFetcher()
