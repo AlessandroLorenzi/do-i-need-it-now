@@ -46,7 +46,6 @@ class PurchaseIntent(db.Model):
     alternative: Mapped[str] = mapped_column(String, nullable=False)
     need_description: Mapped[str] = mapped_column(String, nullable=False)
     vanity_free_desire: Mapped[str] = mapped_column(String, nullable=False)
-    notified: Mapped[bool] = mapped_column(default=False)
 
 
 @app.route("/purchase-intent/submit", methods=["POST"])
@@ -88,8 +87,8 @@ def health_check():
 @app.route("/send-emails", methods=["GET"])
 def send_emails():
     items_to_notify = (
-        PurchaseIntent.query.filter_by(notified=False)
-        # .filter(PurchaseIntent.notify_date <= datetime.now(timezone.utc))
+        PurchaseIntent.query
+        .filter(PurchaseIntent.notify_date <= datetime.now(timezone.utc))
         .all()
     )
     for item in items_to_notify:
@@ -104,7 +103,7 @@ def send_emails():
                 "purchase_intent_email.html", purchase_intent=item, og_info=og_info
             ),
         )
-        item.notified = True
+        db.session.delete(item)
         db.session.commit()
 
     return f"Found {len(items_to_notify)} items to notify.", 200
