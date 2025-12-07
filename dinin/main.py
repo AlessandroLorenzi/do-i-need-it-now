@@ -84,7 +84,7 @@ def health_check():
     return "OK", 200
 
 
-@app.route("/send-emails", methods=["GET"])
+@app.cli.command("send-emails")
 def send_emails():
     items_to_notify = (
         PurchaseIntent.query
@@ -106,13 +106,13 @@ def send_emails():
         db.session.delete(item)
         db.session.commit()
 
-    return f"Found {len(items_to_notify)} items to notify.", 200
+    print(f"Found {len(items_to_notify)} items to notify.")
 
 @app.route("/about", methods=["GET"])
 def about():
     return render_template("about.html")
 
-if __name__ == "__main__":
+def main():
     fetch_og = OpenGraphInfoFetcher()
     mail_sender = MailSender(
         smtp_server=os.getenv("SMTP_SERVER"),
@@ -128,4 +128,9 @@ if __name__ == "__main__":
         app.mail_sender = mail_sender
     with app.app_context():
         db.create_all()
+
+if __name__ == "__main__":
     app.run(debug=True)
+
+main()
+
