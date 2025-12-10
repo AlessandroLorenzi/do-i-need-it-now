@@ -108,6 +108,13 @@ def send_emails():
 
     print(f"Found {len(items_to_notify)} items to notify.")
 
+@app.cli.command("list-purchase-intents")
+def list_purchase_intents():
+    purchase_intents = PurchaseIntent.query.all()
+    for intent in purchase_intents:
+        print(f"ID: {intent.id}, Email: {intent.email}, URL: {intent.url}, Notify Date: {intent.notify_date}")
+
+
 @app.route("/about", methods=["GET"])
 def about():
     return render_template("about.html")
@@ -129,8 +136,8 @@ def main():
     with app.app_context():
         db.create_all()
 
-if __name__ == "__main__":
-    app.run(debug=True)
 
 main()
 
+if __name__ == "__main__":
+    app.run(debug=True)
