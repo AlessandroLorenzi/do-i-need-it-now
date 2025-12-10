@@ -9,6 +9,7 @@ from mail_sender import MailSender
 from open_graph_info_fetcher import OpenGraphInfoFetcher
 from sqlalchemy import DateTime, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from link_affiliate import LinkAffiliate
 
 app = Flask(__name__)
 
@@ -65,6 +66,7 @@ def submit_purchase_intent():
             need_description=data.get("need_description", ""),
             vanity_free_desire=data.get("vanity_free_desire", ""),
         )
+        purchase_intent.url = app.link_affiliate.affiliate_link(purchase_intent.url)
         db.session.add(purchase_intent)
         db.session.commit()
     og_info = app.fetch_og.fetch(purchase_intent.url)
@@ -86,11 +88,9 @@ def health_check():
 
 @app.cli.command("send-emails")
 def send_emails():
-    items_to_notify = (
-        PurchaseIntent.query
-        .filter(PurchaseIntent.notify_date <= datetime.now(timezone.utc))
-        .all()
-    )
+    items_to_notify = PurchaseIntent.query.filter(
+        PurchaseIntent.notify_date <= datetime.now(timezone.utc)
+    ).all()
     for item in items_to_notify:
         og_info = app.fetch_og.fetch(item.url)
         app.mail_sender.send_email(
@@ -108,11 +108,15 @@ def send_emails():
 
     print(f"Found {len(items_to_notify)} items to notify.")
 
+
 @app.cli.command("list-purchase-intents")
 def list_purchase_intents():
     purchase_intents = PurchaseIntent.query.all()
     for intent in purchase_intents:
-        print(f"ID: {intent.id}, Email: {intent.email}, URL: {intent.url}, Notify Date: {intent.notify_date}")
+        print(
+            f"ID: {intent.id}, Email: {intent.email}, URL: {intent.url}, Notify Date: {intent.notify_date}"
+        )
+
 
 @app.cli.command("delete-by-email")
 def delete_purchase_intent_by_email():
@@ -126,9 +130,11 @@ def delete_purchase_intent_by_email():
     else:
         print(f"No purchase intent found with email: {email}")
 
+
 @app.route("/about", methods=["GET"])
 def about():
     return render_template("about.html")
+
 
 def main():
     fetch_og = OpenGraphInfoFetcher()
@@ -139,11 +145,13 @@ def main():
         smtp_username=os.getenv("SMTP_USERNAME"),
         smtp_password=os.getenv("SMTP_PASSWORD"),
     )
+    link_affiliate = LinkAffiliate(amazon_tag=os.getenv("AMAZON_TAG", None))
 
     with app.app_context():
         db.create_all()
         app.fetch_og = fetch_og
         app.mail_sender = mail_sender
+        app.link_affiliate = link_affiliate
     with app.app_context():
         db.create_all()
 
