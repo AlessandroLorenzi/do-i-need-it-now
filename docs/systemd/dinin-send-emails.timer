@@ -1,0 +1,9 @@
+[Unit]
+Description=Run Do I Need It Now - Send Emails hourly between 10 and 22
+
+[Timer]
+OnCalendar=*-*-* 10..22:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

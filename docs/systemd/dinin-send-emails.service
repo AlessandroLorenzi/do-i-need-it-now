@@ -1,0 +1,8 @@
+[Unit]
+Description=Do I Need It Now - send emails
+
+[Service]
+Type=oneshot
+User=alorenzi
+WorkingDirectory=/srv/do-i-need-it-now/dinin/
+ExecStart=/bin/bash -c 'source ../.envrc && poetry run flask --app main:app send-emails'

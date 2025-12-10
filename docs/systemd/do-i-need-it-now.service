@@ -1,0 +1,16 @@
+[Unit]
+Description=Do I Need It Now - API
+After=network.target
+
+[Service]
+User=alorenzi
+WorkingDirectory=/srv/do-i-need-it-now/dinin
+ExecStart=/usr/bin/poetry run gunicorn main:app
+
+Restart=always
+RestartSec=5
+
+Environment="PATH=/usr/bin"
+
+[Install]
+WantedBy=multi-user.target
