@@ -114,6 +114,17 @@ def list_purchase_intents():
     for intent in purchase_intents:
         print(f"ID: {intent.id}, Email: {intent.email}, URL: {intent.url}, Notify Date: {intent.notify_date}")
 
+@app.cli.command("delete-by-email")
+def delete_purchase_intent_by_email():
+    email = input("Enter the email to delete: ")
+    intents = PurchaseIntent.query.filter_by(email=email).all()
+    if intents:
+        for intent in intents:
+            db.session.delete(intent)
+        db.session.commit()
+        print(f"Deleted purchase intent with email: {email}")
+    else:
+        print(f"No purchase intent found with email: {email}")
 
 @app.route("/about", methods=["GET"])
 def about():
