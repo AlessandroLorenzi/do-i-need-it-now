@@ -4,6 +4,9 @@ from bs4 import BeautifulSoup
 
 class OpenGraphInfoFetcher:
     def fetch(self, url: str) -> dict:
+        if url == "":
+            return {}
+
         if "amazon." in url:
             return self.fetch_amazon(url)
         else:

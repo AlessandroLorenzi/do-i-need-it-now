@@ -48,7 +48,6 @@ class PurchaseIntent(db.Model):
     need_description: Mapped[str] = mapped_column(String, nullable=False)
     vanity_free_desire: Mapped[str] = mapped_column(String, nullable=False)
 
-
 @app.route("/purchase-intent/submit", methods=["POST"])
 def submit_purchase_intent():
     data = request.form.to_dict()
@@ -78,7 +77,59 @@ def submit_purchase_intent():
     )
     response = app.make_response(response)
     response.set_cookie("email", purchase_intent.email)
+
+    # Check if email confirmation already exists
+    existing_confirmation = EmailConfirmation.query.filter_by(email=purchase_intent.email).first()
+    if not existing_confirmation or existing_confirmation.confirmed_at is None:
+        confirmation_code = str(uuid.uuid4())
+        confirmation = EmailConfirmation(
+            email=purchase_intent.email,
+            confirmation_code=confirmation_code
+        )
+        db.session.add(confirmation)
+        db.session.commit()
+
+        confirmation_link = request.url_root + "email-confirmation/" + confirmation_code
+        app.mail_sender.send_email(
+            receiver_email=purchase_intent.email,
+            subject="[Do I Need It Now?] Conferma la tua email",
+            text_body=render_template(
+                "email_confirmation.txt", confirmation_link=confirmation_link
+            ),
+            html_body=render_template(
+                "email_confirmation.html", confirmation_link=confirmation_link
+            ),
+        )
+
+
     return response
+
+class EmailConfirmation(db.Model):
+    __tablename__ = "email_confirmation"
+
+    id: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    email: Mapped[str] = mapped_column(String(255), nullable=False)
+    confirmation_code: Mapped[str] = mapped_column(String(36), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
+    confirmed_at: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True, default=None
+    )
+
+@app.route("/email-confirmation/<confirmation_code>", methods=["GET"])
+def email_confirmation(confirmation_code):
+    confirmation = EmailConfirmation.query.filter_by(
+        confirmation_code=confirmation_code
+    ).first()
+    if confirmation:
+        confirmation.confirmed_at = datetime.now(timezone.utc)
+        db.session.commit()
+        return render_template("email_confirmed.html", email=confirmation.email)
+    else:
+        return render_template("email_confirmation_invalid.html"), 404
 
 
 @app.route("/health", methods=["GET"])
@@ -88,11 +139,15 @@ def health_check():
 
 @app.cli.command("send-emails")
 def send_emails():
-    items_to_notify = PurchaseIntent.query.filter(
+    items_to_notify = PurchaseIntent.query.join(EmailConfirmation, PurchaseIntent.email == EmailConfirmation.email
+    ).filter(
+        EmailConfirmation.confirmed_at.isnot(None)
+    ).filter(
         PurchaseIntent.notify_date <= datetime.now(timezone.utc)
     ).all()
     for item in items_to_notify:
         og_info = app.fetch_og.fetch(item.url)
+        
         app.mail_sender.send_email(
             receiver_email=item.email,
             subject="[Do I Need It Now?] É il momento di rivalutare il tuo acquisto",

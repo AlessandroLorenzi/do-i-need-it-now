@@ -1,0 +1,11 @@
+Do I Need It Now?
+=================
+
+Conferma la tua email cliccando sul seguente link:
+
+{{ confirmation_link }}
+
+Se non hai richiesto questa email, puoi ignorarla.
+
+Grazie,
+Il team di Do I Need It Now

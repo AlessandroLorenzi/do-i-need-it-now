@@ -13,5 +13,5 @@ DETTAGLI:
 - Se nessuno sapesse che ho acquistato questo oggetto, lo desidererei ancora? {{ purchase_intent.vanity_free_desire }}
 - Link: {{ purchase_intent.url }}
 
-Ciao,
-The DININ Team
+Grazie,
+Il team di Do I Need It Now
