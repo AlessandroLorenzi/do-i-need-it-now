@@ -1,24 +1,18 @@
 #!/usr/bin/env python3
 import os
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
 from mail_sender import MailSender
 from open_graph_info_fetcher import OpenGraphInfoFetcher
-from sqlalchemy import DateTime, String
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from link_affiliate import LinkAffiliate
+from db import db
+from purchase_intent import PurchaseIntent
+from email_confirmation import EmailConfirmation
 
 app = Flask(__name__)
 
-
-class Base(DeclarativeBase):
-    pass
-
-
-db = SQLAlchemy(model_class=Base)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db"
 db.init_app(app)
 
@@ -28,25 +22,6 @@ def index():
     email = request.cookies.get("email", "")
     return render_template("index.html", email=email)
 
-
-class PurchaseIntent(db.Model):
-    __tablename__ = "purchase_intent"
-
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
-    )
-    notify_date: Mapped[datetime] = mapped_column(
-        DateTime,
-        nullable=False,
-        default=lambda: datetime.now(timezone.utc) + timedelta(days=7),
-    )
-    description: Mapped[str] = mapped_column(String, nullable=False)
-    email: Mapped[str] = mapped_column(String(255), nullable=False)
-    url: Mapped[str] = mapped_column(String, nullable=False)
-
-    alternative: Mapped[str] = mapped_column(String, nullable=False)
-    need_description: Mapped[str] = mapped_column(String, nullable=False)
-    vanity_free_desire: Mapped[str] = mapped_column(String, nullable=False)
 
 @app.route("/purchase-intent/submit", methods=["POST"])
 def submit_purchase_intent():
@@ -79,12 +54,13 @@ def submit_purchase_intent():
     response.set_cookie("email", purchase_intent.email)
 
     # Check if email confirmation already exists
-    existing_confirmation = EmailConfirmation.query.filter_by(email=purchase_intent.email).first()
+    existing_confirmation = EmailConfirmation.query.filter_by(
+        email=purchase_intent.email
+    ).first()
     if not existing_confirmation or existing_confirmation.confirmed_at is None:
         confirmation_code = str(uuid.uuid4())
         confirmation = EmailConfirmation(
-            email=purchase_intent.email,
-            confirmation_code=confirmation_code
+            email=purchase_intent.email, confirmation_code=confirmation_code
         )
         db.session.add(confirmation)
         db.session.commit()
@@ -101,23 +77,8 @@ def submit_purchase_intent():
             ),
         )
 
-
     return response
 
-class EmailConfirmation(db.Model):
-    __tablename__ = "email_confirmation"
-
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
-    )
-    email: Mapped[str] = mapped_column(String(255), nullable=False)
-    confirmation_code: Mapped[str] = mapped_column(String(36), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
-    )
-    confirmed_at: Mapped[datetime | None] = mapped_column(
-        DateTime, nullable=True, default=None
-    )
 
 @app.route("/email-confirmation/<confirmation_code>", methods=["GET"])
 def email_confirmation(confirmation_code):
@@ -139,15 +100,17 @@ def health_check():
 
 @app.cli.command("send-emails")
 def send_emails():
-    items_to_notify = PurchaseIntent.query.join(EmailConfirmation, PurchaseIntent.email == EmailConfirmation.email
-    ).filter(
-        EmailConfirmation.confirmed_at.isnot(None)
-    ).filter(
-        PurchaseIntent.notify_date <= datetime.now(timezone.utc)
-    ).all()
+    items_to_notify = (
+        PurchaseIntent.query.join(
+            EmailConfirmation, PurchaseIntent.email == EmailConfirmation.email
+        )
+        .filter(EmailConfirmation.confirmed_at.isnot(None))
+        .filter(PurchaseIntent.notify_date <= datetime.now(timezone.utc))
+        .all()
+    )
     for item in items_to_notify:
         og_info = app.fetch_og.fetch(item.url)
-        
+
         app.mail_sender.send_email(
             receiver_email=item.email,
             subject="[Do I Need It Now?] É il momento di rivalutare il tuo acquisto",
